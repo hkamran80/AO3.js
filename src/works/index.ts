@@ -10,6 +10,9 @@ import {
   getWorkTitle as getWorkTitleFromChaptersIndex,
 } from "./chapter-getters";
 import {
+  getChapterIndex,
+  getChapterName,
+  getChapterSummary,
   getWorkAdditionalTags,
   getWorkAuthors,
   getWorkBookmarkCount,
@@ -38,12 +41,14 @@ import { AxiosRequestConfig } from "axios";
 
 export const getWork = async ({
   workId,
+  chapterId,
   axiosOptions,
 }: {
   workId: string;
+  chapterId?: string;
   axiosOptions?: AxiosRequestConfig;
 }): Promise<WorkSummary | LockedWorkSummary> => {
-  const workPage = await loadWorkPage(workId, axiosOptions);
+  const workPage = await loadWorkPage(workId, chapterId, axiosOptions);
 
   if (getWorkLocked(workPage)) {
     return {
@@ -53,6 +58,8 @@ export const getWork = async ({
 
   const totalChapters = getWorkTotalChapters(workPage);
   const publishedChapters = getWorkPublishedChapters(workPage);
+  const chapterIndex = getChapterIndex(workPage);
+
   return {
     id: workId,
     authors: getWorkAuthors(workPage),
@@ -76,9 +83,20 @@ export const getWork = async ({
       published: publishedChapters,
       total: totalChapters,
     },
+    chapterInfo: chapterId
+      ? {
+          id: chapterId,
+          index: chapterIndex,
+          name: getChapterName(workPage),
+          summary: getChapterSummary(workPage),
+        }
+      : null,
     complete: totalChapters !== null && totalChapters === publishedChapters,
     series: getWorkSeries(workPage),
-    summary: getWorkSummary(workPage),
+    summary:
+      chapterIndex === 1 || totalChapters === 1
+        ? getWorkSummary(workPage)
+        : null,
     stats: {
       bookmarks: getWorkBookmarkCount(workPage),
       comments: getWorkCommentCount(workPage),

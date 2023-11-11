@@ -52,21 +52,22 @@ export interface WorkPage extends CheerioAPI {
 }
 export const loadWorkPage = async (
   workId: string,
-  axiosOptions?: AxiosRequestConfig
+  chapterId?: string,
+  axiosOptions?: AxiosRequestConfig,
 ) => {
   return load(
     (
       await axios.get<string>(
-        getWorkUrl({ workId }),
+        getWorkUrl({ workId, chapterId }),
         axiosOptions ?? {
           headers: {
             // We set a cookie to bypass the Terms of Service agreement modal that appears when viewing works as a guest, which prevented some selectors from working. Appending ?view_adult=true to URLs doesn't work for chaptered works since that part gets cleared when those are automatically redirected.
             Cookie: "view_adult=true;",
           },
-        }
+        },
       )
-    ).data
-  ) as WorkPage;
+    ).data as WorkPage,
+  );
 };
 
 // A user profile page.
