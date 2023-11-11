@@ -10,6 +10,9 @@ import {
   getWorkTitle as getWorkTitleFromChaptersIndex,
 } from "./chapter-getters";
 import {
+  getChapterIndex,
+  getChapterName,
+  getChapterSummary,
   getWorkAdditionalTags,
   getWorkAuthors,
   getWorkBookmarkCount,
@@ -37,10 +40,12 @@ import { loadChaptersIndexPage, loadWorkPage } from "../page-loaders";
 
 export const getWork = async ({
   workId,
+  chapterId,
 }: {
   workId: string;
+  chapterId?: string;
 }): Promise<WorkSummary | LockedWorkSummary> => {
-  const workPage = await loadWorkPage(workId);
+  const workPage = await loadWorkPage(workId, chapterId);
 
   if (getWorkLocked(workPage)) {
     return {
@@ -50,6 +55,8 @@ export const getWork = async ({
 
   const totalChapters = getWorkTotalChapters(workPage);
   const publishedChapters = getWorkPublishedChapters(workPage);
+  const chapterIndex = getChapterIndex(workPage);
+
   return {
     id: workId,
     authors: getWorkAuthors(workPage),
@@ -73,9 +80,20 @@ export const getWork = async ({
       published: publishedChapters,
       total: totalChapters,
     },
+    chapterInfo: chapterId
+      ? {
+          id: chapterId,
+          index: chapterIndex,
+          name: getChapterName(workPage),
+          summary: getChapterSummary(workPage),
+        }
+      : null,
     complete: totalChapters !== null && totalChapters === publishedChapters,
     series: getWorkSeries(workPage),
-    summary: getWorkSummary(workPage),
+    summary:
+      chapterIndex === 1 || totalChapters === 1
+        ? getWorkSummary(workPage)
+        : null,
     stats: {
       bookmarks: getWorkBookmarkCount(workPage),
       comments: getWorkCommentCount(workPage),
