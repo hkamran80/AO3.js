@@ -52,11 +52,12 @@ export interface WorkPage extends CheerioAPI {
 }
 export const loadWorkPage = async (
   workId: string,
+  chapterId?: string,
   axiosInstance: AxiosInstance = axios
 ) => {
   return load(
     (
-      await axiosInstance.get<string>(getWorkUrl({ workId }), {
+      await axiosInstance.get<string>(getWorkUrl({ workId, chapterId }), {
         headers: {
           // We set a cookie to bypass the Terms of Service agreement modal that appears when viewing works as a guest, which prevented some selectors from working. Appending ?view_adult=true to URLs doesn't work for chaptered works since that part gets cleared when those are automatically redirected.
           Cookie: "view_adult=true;",
