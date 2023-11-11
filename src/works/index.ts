@@ -37,15 +37,18 @@ import {
   getWorkWordCount,
 } from "./work-getters";
 import { loadChaptersIndexPage, loadWorkPage } from "../page-loaders";
+import { AxiosRequestConfig } from "axios";
 
 export const getWork = async ({
   workId,
   chapterId,
+  axiosOptions,
 }: {
   workId: string;
   chapterId?: string;
+  axiosOptions?: AxiosRequestConfig;
 }): Promise<WorkSummary | LockedWorkSummary> => {
-  const workPage = await loadWorkPage(workId, chapterId);
+  const workPage = await loadWorkPage(workId, chapterId, axiosOptions);
 
   if (getWorkLocked(workPage)) {
     return {
@@ -106,15 +109,17 @@ export const getWork = async ({
 
 export const getWorkWithChapters = async ({
   workId,
+  axiosOptions,
 }: {
   workId: string;
+  axiosOptions?: AxiosRequestConfig;
 }): Promise<{
   title: string;
   authors: "Anonymous" | Author[];
   workId: string;
   chapters: Chapter[];
 }> => {
-  const page = await loadChaptersIndexPage({ workId });
+  const page = await loadChaptersIndexPage({ workId, axiosOptions });
 
   return {
     title: getWorkTitleFromChaptersIndex(page),
