@@ -2,10 +2,12 @@ export const getWorkUrl = ({
   workId,
   chapterId,
   collectionName,
+  showFullWork,
 }: {
   workId: string;
   chapterId?: string;
   collectionName?: string;
+  showFullWork?: boolean;
 }) => {
   let workUrl = `https://archiveofourown.org`;
 
@@ -17,6 +19,10 @@ export const getWorkUrl = ({
 
   if (chapterId) {
     workUrl += `/chapters/${chapterId}`;
+  }
+
+  if (showFullWork) {
+    workUrl += "?view_full_work=true";
   }
 
   return workUrl;
