@@ -1,7 +1,7 @@
 {
-  "name": "@bobaboard/ao3.js",
-  "version": "0.14.0",
-  "description": "A NodeJS API for scraping AO3 data",
+  "name": "@hkamran/ao3.js",
+  "version": "0.14.0-1",
+  "description": "A Node.js API for scraping AO3 data",
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
