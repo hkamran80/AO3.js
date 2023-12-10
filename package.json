@@ -1,6 +1,6 @@
 {
   "name": "@hkamran/ao3.js",
-  "version": "0.11.0-1",
+  "version": "0.14.0-1",
   "description": "A Node.js API for scraping AO3 data",
   "type": "module",
   "types": "./dist/index.d.ts",

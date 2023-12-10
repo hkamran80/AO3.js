@@ -1,6 +1,7 @@
 import {
   Author,
   Chapter,
+  FullWorkSummary,
   LockedWorkSummary,
   WorkSummary,
 } from "types/entities";
@@ -10,6 +11,7 @@ import {
   getWorkTitle as getWorkTitleFromChaptersIndex,
 } from "./chapter-getters";
 import {
+  getAllChapters,
   getChapterIndex,
   getChapterName,
   getChapterSummary,
@@ -43,12 +45,19 @@ export const getWork = async ({
   workId,
   chapterId,
   axiosInstance,
+  fullWork,
 }: {
   workId: string;
   chapterId?: string;
   axiosInstance?: AxiosInstance;
-}): Promise<WorkSummary | LockedWorkSummary> => {
-  const workPage = await loadWorkPage(workId, chapterId, axiosInstance);
+  fullWork?: boolean;
+}): Promise<WorkSummary | FullWorkSummary | LockedWorkSummary> => {
+  const workPage = await loadWorkPage({
+    workId,
+    chapterId,
+    axiosInstance,
+    fullWork,
+  });
 
   if (getWorkLocked(workPage)) {
     return {
@@ -60,7 +69,7 @@ export const getWork = async ({
   const publishedChapters = getWorkPublishedChapters(workPage);
   const chapterIndex = getChapterIndex(workPage);
 
-  return {
+  const workSummary: WorkSummary = {
     id: workId,
     authors: getWorkAuthors(workPage),
     title: getWorkTitle(workPage),
@@ -83,14 +92,15 @@ export const getWork = async ({
       published: publishedChapters,
       total: totalChapters,
     },
-    chapterInfo: chapterId
-      ? {
-          id: chapterId,
-          index: chapterIndex,
-          name: getChapterName(workPage),
-          summary: getChapterSummary(workPage),
-        }
-      : null,
+    chapterInfo:
+      chapterId && !fullWork
+        ? {
+            id: chapterId,
+            index: chapterIndex,
+            name: getChapterName(workPage),
+            summary: getChapterSummary(workPage),
+          }
+        : null,
     complete: totalChapters !== null && totalChapters === publishedChapters,
     series: getWorkSeries(workPage),
     summary:
@@ -105,6 +115,15 @@ export const getWork = async ({
     },
     locked: false,
   };
+
+  if (!fullWork || totalChapters === 1) {
+    return workSummary;
+  } else {
+    return {
+      ...workSummary,
+      allChapters: getAllChapters(workPage),
+    };
+  }
 };
 
 export const getWorkWithChapters = async ({

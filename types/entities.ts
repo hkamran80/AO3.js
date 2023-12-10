@@ -159,6 +159,10 @@ export interface WorkSummary {
   locked: false;
 }
 
+export interface FullWorkSummary extends WorkSummary {
+  allChapters: ChapterInfo[];
+}
+
 export interface LockedWorkSummary {
   locked: true;
 }
@@ -170,4 +174,10 @@ export interface Chapter {
   title: string;
   publishedAt: string;
   url: string;
+}
+
+export interface ChapterInfo
+  extends Omit<Chapter, "workId" | "title" | "publishedAt" | "url"> {
+  name: string | null;
+  summary: string | null;
 }
