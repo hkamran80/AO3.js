@@ -1,6 +1,7 @@
 import {
   Author,
   BasicSeries,
+  ChapterInfo,
   WorkCategory,
   WorkRatings,
   WorkSummary,
@@ -8,6 +9,7 @@ import {
 } from "types/entities";
 
 import { WorkPage } from "../page-loaders";
+import { getWorkDetailsFromUrl } from "src/urls";
 
 export const getWorkAuthors = ($workPage: WorkPage): "Anonymous" | Author[] => {
   const authorLinks = $workPage("h3.byline a[rel='author']");
@@ -208,4 +210,42 @@ export const getChapterName = (
 export const getChapterSummary = ($workPage: WorkPage): string | null => {
   const summary = $workPage(".chapter .summary blockquote.userstuff").html();
   return summary ? summary.trim() : null;
+};
+
+// Full work-specific
+export const getAllChapters = ($workPage: WorkPage): ChapterInfo[] => {
+  const chapters: ChapterInfo[] = [];
+
+  const selector = "#chapters > .chapter";
+  $workPage(selector).each((index) => {
+    const chapterInfoHtml = $workPage(`${selector}:nth-of-type(${index + 1})`);
+
+    const nameElement = chapterInfoHtml.find("h3.title");
+    const nameText = nameElement.text().trim();
+
+    const chapterName = nameElement.find("a");
+    const chapterIndex = parseInt(
+      chapterName.text().trim().replace("Chapter ", "")
+    );
+
+    const summary = chapterInfoHtml
+      .find(".summary blockquote.userstuff")
+      .html();
+
+    const url = getWorkDetailsFromUrl({
+      url: chapterName.attr("href")!,
+    });
+
+    chapters[index] = {
+      id: url.chapterId!,
+      index: chapterIndex,
+      name:
+        nameText && nameText.includes(":")
+          ? nameText.slice(nameText.indexOf(": ") + 2)
+          : null,
+      summary: summary ? summary.trim() : null,
+    };
+  });
+
+  return chapters;
 };
